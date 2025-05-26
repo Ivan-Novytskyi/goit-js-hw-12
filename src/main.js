@@ -19,7 +19,14 @@ let currentQuery = '';
 form.addEventListener('submit', async e => {
   e.preventDefault();
   const query = e.target.searchQuery.value.trim();
-  if (!query) return;
+  if (!query) {
+    iziToast.warning({
+      title: 'Empty Search',
+      message: 'Please enter a search term before submitting.',
+      position: 'topRight',
+    });
+    return;
+  }
 
   currentQuery = query;
   currentPage = 1;
