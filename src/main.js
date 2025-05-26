@@ -12,6 +12,7 @@ import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
 const form = document.querySelector('.form');
+const loadMoreBtn = document.querySelector('.load-more');
 let currentPage = 1;
 let currentQuery = '';
 
@@ -31,6 +32,7 @@ form.addEventListener('submit', async e => {
       currentQuery,
       currentPage
     );
+
     if (hits.length === 0) {
       iziToast.info({
         title: 'No Results',
@@ -46,7 +48,6 @@ form.addEventListener('submit', async e => {
       showLoadMoreButton();
     }
   } catch (error) {
-    console.error('Error fetching images:', error);
     iziToast.error({
       title: 'Error',
       message: 'Something went wrong. Please try again.',
@@ -57,9 +58,13 @@ form.addEventListener('submit', async e => {
   }
 });
 
-document.querySelector('.load-more').addEventListener('click', async () => {
+loadMoreBtn.addEventListener('click', async () => {
   currentPage += 1;
   showLoader();
+
+  const firstCardBefore = document.querySelector(
+    '.gallery .photo-card:last-child'
+  );
 
   try {
     const { hits, totalHits } = await getImagesByQuery(
@@ -77,8 +82,9 @@ document.querySelector('.load-more').addEventListener('click', async () => {
         position: 'topRight',
       });
     }
+
+    scrollToNewImages();
   } catch (error) {
-    console.error('Error loading more images:', error);
     iziToast.error({
       title: 'Error',
       message: 'Failed to load more images.',
@@ -88,3 +94,14 @@ document.querySelector('.load-more').addEventListener('click', async () => {
     hideLoader();
   }
 });
+
+function scrollToNewImages() {
+  const firstNewCard = document.querySelectorAll('.gallery .photo-card');
+  if (firstNewCard.length < 16) return; // якщо менше ніж 2 сторінки — не скролимо
+
+  const cardHeight = firstNewCard[0].getBoundingClientRect().height;
+  window.scrollBy({
+    top: cardHeight * 2 + 24 * 2, // 2 висоти з урахуванням міжрядкових відступів
+    behavior: 'smooth',
+  });
+}
